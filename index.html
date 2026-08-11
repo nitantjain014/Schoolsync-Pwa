@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SchoolSync</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    iframe { width: 100%; height: 100vh; border: none; display: block; }
+  </style>
+</head>
+<body>
+  <iframe src="https://os.glideapps.dev/o/f4d918a8-3015-4d6c-bb8d-f792c39626dc/p/690d1a92-7bb2-4bb3-aac5-40821cea9ae1/s/d354c6f1-9ecd-4a1f-94c9-9a587585d43d?view=app%3Aschoolsync" allow="geolocation; camera; microphone"></iframe>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+</body>
+</html>
