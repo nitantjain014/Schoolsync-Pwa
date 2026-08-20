@@ -8,11 +8,11 @@ const store = {
 };
 
 let tasks = store.get('ss_tasks', []);
-let events = store.get('ss_events', []); // {id, date:'YYYY-MM-DD', name, time, type, notes}
-let marks = store.get('ss_marks', []);   // {subject, test, scored, total}
+let events = store.get('ss_events', []);
+let marks = store.get('ss_marks', []);
 let timerLog = store.get('ss_timerlog', []);
 let chatHistory = store.get('ss_chat', []);
-let settings = store.get('ss_settings', { theme: 'dark', name: '' });
+let settings = store.get('ss_settings', { theme: 'dark', name: '', backdrop: 'none' });
 
 function saveAll() {
   store.set('ss_tasks', tasks);
@@ -29,7 +29,8 @@ const navBtns = document.querySelectorAll('.nav-btn');
 
 function showScreen(name) {
   screens.forEach(s => s.classList.toggle('active', s.id === 'screen-' + name));
-  navBtns.forEach(b => b.classList.toggle('active', b.dataset.nav === name || (name!=='today'&&name!=='calendar'&&name!=='todo'&&name!=='timer' && b.dataset.nav==='more')));
+  const moreScreens = ['marks','chatbot','flashcards','settings'];
+  navBtns.forEach(b => b.classList.toggle('active', b.dataset.nav === name || (moreScreens.includes(name) && b.dataset.nav === 'more')));
   if (name === 'today') renderToday();
   if (name === 'calendar') renderCalendar();
   if (name === 'todo') renderTodo();
@@ -66,6 +67,44 @@ document.getElementById('resetDataBtn').addEventListener('click', () => {
   }
 });
 
+// ---------- Backdrop Carousel ----------
+const bgLayer = document.getElementById('bgLayer');
+const carouselTrack = document.getElementById('bgCarouselTrack');
+const carouselDots = document.getElementById('bgCarouselDots');
+const slides = Array.from(carouselTrack.querySelectorAll('.carousel-slide'));
+
+function applyBackdrop() {
+  if (settings.backdrop && settings.backdrop !== 'none') {
+    bgLayer.style.backgroundImage = `url('${settings.backdrop}')`;
+    bgLayer.classList.add('has-bg');
+  } else {
+    bgLayer.style.backgroundImage = 'none';
+    bgLayer.classList.remove('has-bg');
+  }
+  slides.forEach(s => s.classList.toggle('selected', s.dataset.bg === (settings.backdrop || 'none')));
+}
+
+carouselDots.innerHTML = slides.map((_, i) => `<span class="dot-ind${i===0?' active':''}"></span>`).join('');
+const dotEls = Array.from(carouselDots.children);
+
+slides.forEach(slide => {
+  slide.addEventListener('click', () => {
+    settings.backdrop = slide.dataset.bg;
+    saveAll();
+    applyBackdrop();
+    slide.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  });
+});
+carouselTrack.addEventListener('scroll', () => {
+  const trackCenter = carouselTrack.scrollLeft + carouselTrack.clientWidth / 2;
+  let closest = 0, closestDist = Infinity;
+  slides.forEach((s, i) => {
+    const dist = Math.abs((s.offsetLeft + s.clientWidth/2) - trackCenter);
+    if (dist < closestDist) { closestDist = dist; closest = i; }
+  });
+  dotEls.forEach((d, i) => d.classList.toggle('active', i === closest));
+});
+
 // ---------- Dates ----------
 function todayISO() {
   const d = new Date();
@@ -86,42 +125,40 @@ function urgencyOf(iso) {
   if (d <= 7) return 'Medium';
   return 'Low';
 }
+function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 // ---------- TODAY ----------
 function renderToday() {
   document.getElementById('todayDate').textContent = fmtNiceDate(todayISO());
 
-  // focus area from marks
   const focusEl = document.getElementById('focusText');
-  if (marks.length === 0) {
-    focusEl.textContent = 'Add marks to see your weakest subject.';
-  } else {
-    const bySubject = {};
-    marks.forEach(m => {
-      if (!bySubject[m.subject]) bySubject[m.subject] = { scored:0, total:0 };
-      bySubject[m.subject].scored += Number(m.scored);
-      bySubject[m.subject].total += Number(m.total);
-    });
-    let weakest = null, weakestPct = 101;
-    Object.keys(bySubject).forEach(sub => {
-      const pct = (bySubject[sub].scored / bySubject[sub].total) * 100;
-      if (pct < weakestPct) { weakestPct = pct; weakest = sub; }
-    });
-    focusEl.innerHTML = `<b>${weakest}</b> is your weakest subject at ${weakestPct.toFixed(0)}%.`;
-  }
+  const weak = computeWeakestSubject();
+  focusEl.innerHTML = weak ? `<b>${escapeHtml(weak.subject)}</b> is your weakest subject at ${weak.pct.toFixed(0)}%.` : 'Add marks to see your weakest subject.';
 
   const todayTasksEl = document.getElementById('todayTasks');
   const dueToday = tasks.filter(t => t.due === todayISO() && !t.done);
-  todayTasksEl.innerHTML = dueToday.length
-    ? dueToday.map(t => taskRowHTML(t)).join('')
-    : `<div class="empty-hint">No tasks due today.</div>`;
+  todayTasksEl.innerHTML = dueToday.length ? dueToday.map(t => taskRowHTML(t)).join('') : `<div class="empty-hint">No tasks due today.</div>`;
   attachTaskListeners(todayTasksEl);
 
   const todayEventsEl = document.getElementById('todayEvents');
   const evToday = events.filter(e => e.date === todayISO());
-  todayEventsEl.innerHTML = evToday.length
-    ? evToday.map(e => eventRowHTML(e)).join('')
-    : `<div class="empty-hint">No events today.</div>`;
+  todayEventsEl.innerHTML = evToday.length ? evToday.map(e => eventRowHTML(e)).join('') : `<div class="empty-hint">No events today.</div>`;
+}
+
+function computeWeakestSubject() {
+  if (marks.length === 0) return null;
+  const bySubject = {};
+  marks.forEach(m => {
+    if (!bySubject[m.subject]) bySubject[m.subject] = { scored:0, total:0 };
+    bySubject[m.subject].scored += Number(m.scored);
+    bySubject[m.subject].total += Number(m.total);
+  });
+  let weakest = null, weakestPct = 101;
+  Object.keys(bySubject).forEach(sub => {
+    const pct = (bySubject[sub].scored / bySubject[sub].total) * 100;
+    if (pct < weakestPct) { weakestPct = pct; weakest = sub; }
+  });
+  return weakest ? { subject: weakest, pct: weakestPct } : null;
 }
 
 function taskRowHTML(t) {
@@ -146,7 +183,6 @@ function eventRowHTML(e) {
     <span class="tag ${tagClass}">${e.type}</span>
   </div>`;
 }
-function escapeHtml(s) { return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 function attachTaskListeners(container) {
   container.querySelectorAll('[data-check]').forEach(b => {
@@ -162,17 +198,45 @@ function attachTaskListeners(container) {
   });
 }
 
-// ---------- TO-DO ----------
+// ---------- TO-DO (redesigned: stats + grouped by urgency) ----------
 function renderTodo() {
+  const open = tasks.filter(t => !t.done);
+  document.getElementById('statOpen').textContent = open.length;
+  document.getElementById('statHigh').textContent = open.filter(t => t.urgency === 'High').length;
+  document.getElementById('statDone').textContent = tasks.filter(t => t.done).length;
+
+  const groupsEl = document.getElementById('todoGroups');
+  if (tasks.length === 0) {
+    groupsEl.innerHTML = `<div class="empty-hint">No tasks yet. Tap + to add one.</div>`;
+    return;
+  }
   const order = { High: 0, Medium: 1, Low: 2 };
-  const sorted = [...tasks].sort((a,b) => {
-    if (order[a.urgency] !== order[b.urgency]) return order[a.urgency] - order[b.urgency];
-    return a.due.localeCompare(b.due);
+  const sortedOpen = open.sort((a,b) => order[a.urgency]-order[b.urgency] || a.due.localeCompare(b.due));
+  const done = tasks.filter(t => t.done);
+
+  let html = '';
+  ['High','Medium','Low'].forEach(level => {
+    const group = sortedOpen.filter(t => t.urgency === level);
+    if (group.length) {
+      html += `<div class="todo-group-title ${level.toLowerCase()}">${level} Priority</div>`;
+      html += `<div class="list-plain">${group.map(t => taskRowHTML(t)).join('')}</div>`;
+    }
   });
-  const el = document.getElementById('todoList');
-  el.innerHTML = sorted.length ? sorted.map(t => taskRowHTML(t)).join('') : `<div class="empty-hint">No tasks yet. Add one above.</div>`;
-  attachTaskListeners(el);
+  if (done.length) {
+    html += `<div class="todo-group-title" style="color:var(--text-dim);">Completed</div>`;
+    html += `<div class="list-plain">${done.map(t => taskRowHTML(t)).join('')}</div>`;
+  }
+  groupsEl.innerHTML = html;
+  attachTaskListeners(groupsEl);
 }
+
+document.getElementById('openAddTaskBtn').addEventListener('click', () => {
+  document.getElementById('taskNameInput').value = '';
+  document.getElementById('taskSubjectInput').value = '';
+  document.getElementById('taskDueInput').value = '';
+  document.getElementById('addTaskOverlay').classList.add('active');
+});
+document.getElementById('cancelTaskBtn').addEventListener('click', () => document.getElementById('addTaskOverlay').classList.remove('active'));
 document.getElementById('addTaskBtn').addEventListener('click', () => {
   const name = document.getElementById('taskNameInput').value.trim();
   const subject = document.getElementById('taskSubjectInput').value.trim();
@@ -180,9 +244,7 @@ document.getElementById('addTaskBtn').addEventListener('click', () => {
   if (!name || !due) { alert('Please enter a task name and due date.'); return; }
   tasks.push({ id: 't'+Date.now(), name, subject, due, urgency: urgencyOf(due), done: false });
   saveAll();
-  document.getElementById('taskNameInput').value = '';
-  document.getElementById('taskSubjectInput').value = '';
-  document.getElementById('taskDueInput').value = '';
+  document.getElementById('addTaskOverlay').classList.remove('active');
   renderTodo(); renderToday();
 });
 
@@ -254,9 +316,7 @@ document.getElementById('saveEventBtn').addEventListener('click', () => {
   const name = document.getElementById('eventNameInput').value.trim();
   if (!name) { alert('Please enter an event name.'); return; }
   events.push({
-    id: 'e'+Date.now(),
-    date: selectedDateISO,
-    name,
+    id: 'e'+Date.now(), date: selectedDateISO, name,
     time: document.getElementById('eventTimeInput').value,
     type: document.getElementById('eventTypeInput').value,
     notes: document.getElementById('eventNotesInput').value.trim()
@@ -266,11 +326,14 @@ document.getElementById('saveEventBtn').addEventListener('click', () => {
   renderCalendar(); renderToday();
 });
 
-// ---------- TIMER ----------
-let timerSeconds = 25*60, timerInterval = null, timerRunning = false;
+// ---------- TIMER (redesigned: ring progress + stats) ----------
+const RING_CIRC = 565.48;
+let timerTotal = 25*60, timerSeconds = 25*60, timerInterval = null, timerRunning = false;
 function updateTimerDisplay() {
   const m = Math.floor(timerSeconds/60), s = timerSeconds%60;
   document.getElementById('timerDisplay').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const progress = 1 - (timerSeconds / timerTotal);
+  document.getElementById('ringFg').style.strokeDashoffset = RING_CIRC * (1 - progress);
 }
 document.getElementById('timerStartBtn').addEventListener('click', () => {
   if (timerRunning) return;
@@ -284,13 +347,16 @@ document.getElementById('timerStartBtn').addEventListener('click', () => {
       timerLog.unshift({ date: todayISO(), subject: subj, minutes: 25 });
       saveAll(); renderTimerLog();
       alert('Session complete! Great work.');
-      timerSeconds = 25*60; updateTimerDisplay();
+      timerSeconds = timerTotal; updateTimerDisplay();
     }
   }, 1000);
 });
 document.getElementById('timerPauseBtn').addEventListener('click', () => { clearInterval(timerInterval); timerRunning = false; });
-document.getElementById('timerResetBtn').addEventListener('click', () => { clearInterval(timerInterval); timerRunning = false; timerSeconds = 25*60; updateTimerDisplay(); });
+document.getElementById('timerResetBtn').addEventListener('click', () => { clearInterval(timerInterval); timerRunning = false; timerSeconds = timerTotal; updateTimerDisplay(); });
 function renderTimerLog() {
+  const todays = timerLog.filter(l => l.date === todayISO());
+  document.getElementById('statSessions').textContent = todays.length;
+  document.getElementById('statMinutes').textContent = todays.reduce((sum,l)=>sum+l.minutes,0);
   const el = document.getElementById('timerLog');
   el.innerHTML = timerLog.length ? timerLog.slice(0,10).map(l => `<div class="list-item">
       <div style="flex:1;"><div class="li-main">${escapeHtml(l.subject)}</div><div class="li-sub">${l.date}</div></div>
@@ -299,7 +365,15 @@ function renderTimerLog() {
 }
 updateTimerDisplay();
 
-// ---------- MARKS ----------
+// ---------- MARKS (redesigned: focus card + chart + history) ----------
+document.getElementById('openAddMarkBtn').addEventListener('click', () => {
+  document.getElementById('markSubjectInput').value = '';
+  document.getElementById('markTestInput').value = '';
+  document.getElementById('markScoredInput').value = '';
+  document.getElementById('markTotalInput').value = '';
+  document.getElementById('addMarkOverlay').classList.add('active');
+});
+document.getElementById('cancelMarkBtn').addEventListener('click', () => document.getElementById('addMarkOverlay').classList.remove('active'));
 document.getElementById('addMarkBtn').addEventListener('click', () => {
   const subject = document.getElementById('markSubjectInput').value.trim();
   const test = document.getElementById('markTestInput').value.trim();
@@ -308,32 +382,48 @@ document.getElementById('addMarkBtn').addEventListener('click', () => {
   if (!subject || !scored || !total) { alert('Please fill subject, marks scored, and total.'); return; }
   marks.push({ subject, test, scored: Number(scored), total: Number(total) });
   saveAll();
-  document.getElementById('markSubjectInput').value = '';
-  document.getElementById('markTestInput').value = '';
-  document.getElementById('markScoredInput').value = '';
-  document.getElementById('markTotalInput').value = '';
+  document.getElementById('addMarkOverlay').classList.remove('active');
   renderMarks();
 });
 function renderMarks() {
-  const el = document.getElementById('marksChart');
-  if (marks.length === 0) { el.innerHTML = `<div class="empty-hint">No results yet. Add one above.</div>`; return; }
-  const bySubject = {};
-  marks.forEach(m => {
-    if (!bySubject[m.subject]) bySubject[m.subject] = { scored:0, total:0 };
-    bySubject[m.subject].scored += m.scored;
-    bySubject[m.subject].total += m.total;
-  });
-  el.innerHTML = Object.keys(bySubject).map(sub => {
-    const pct = (bySubject[sub].scored / bySubject[sub].total) * 100;
-    return `<div class="bar-row">
-      <div class="bar-label">${escapeHtml(sub)}</div>
-      <div class="bar-track"><div class="bar-fill ${pct<50?'weak':''}" style="width:${pct}%;"></div></div>
-      <div class="bar-pct">${pct.toFixed(0)}%</div>
-    </div>`;
-  }).join('');
+  const weak = computeWeakestSubject();
+  const focusCard = document.getElementById('marksFocusCard');
+  if (weak) {
+    focusCard.style.display = 'block';
+    document.getElementById('marksFocusText').innerHTML = `<b>${escapeHtml(weak.subject)}</b> at ${weak.pct.toFixed(0)}% &mdash; needs the most attention.`;
+  } else {
+    focusCard.style.display = 'none';
+  }
+
+  const chartEl = document.getElementById('marksChart');
+  if (marks.length === 0) {
+    chartEl.innerHTML = `<div class="empty-hint">No results yet. Tap + to add one.</div>`;
+  } else {
+    const bySubject = {};
+    marks.forEach(m => {
+      if (!bySubject[m.subject]) bySubject[m.subject] = { scored:0, total:0 };
+      bySubject[m.subject].scored += m.scored;
+      bySubject[m.subject].total += m.total;
+    });
+    chartEl.innerHTML = Object.keys(bySubject).map(sub => {
+      const pct = (bySubject[sub].scored / bySubject[sub].total) * 100;
+      return `<div class="bar-row">
+        <div class="bar-label">${escapeHtml(sub)}</div>
+        <div class="bar-track"><div class="bar-fill ${pct<50?'weak':''}" style="width:${pct}%;"></div></div>
+        <div class="bar-pct">${pct.toFixed(0)}%</div>
+      </div>`;
+    }).join('');
+  }
+
+  const histEl = document.getElementById('marksHistory');
+  const recent = [...marks].reverse().slice(0,8);
+  histEl.innerHTML = recent.length ? recent.map(m => `<div class="list-item">
+      <div style="flex:1;"><div class="li-main">${escapeHtml(m.subject)}</div><div class="li-sub">${escapeHtml(m.test||'')}</div></div>
+      <span class="tag tag-low">${m.scored}/${m.total}</span>
+    </div>`).join('') : `<div class="empty-hint">No results yet.</div>`;
 }
 
-// ---------- CHATBOT (simple local helper, no external API) ----------
+// ---------- CHATBOT (simple local helper) ----------
 function renderChat() {
   const el = document.getElementById('chatMessages');
   el.innerHTML = chatHistory.map(m => `<div class="msg ${m.role}">${escapeHtml(m.text)}</div>`).join('');
@@ -359,12 +449,12 @@ function sendChat() {
   renderChat();
 }
 
-// ---------- FLASHCARDS (simple local generator, no external API) ----------
+// ---------- FLASHCARDS ----------
 document.getElementById('generateFlashcardsBtn').addEventListener('click', () => {
   const notes = document.getElementById('notesInput').value.trim();
   if (!notes) { alert('Paste some notes first.'); return; }
   const sentences = notes.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(s => s.length > 15);
-  const count = Math.max(2, Math.min(10, Math.round(sentences.length / 1)));
+  const count = Math.max(2, Math.min(10, sentences.length));
   const chosen = sentences.slice(0, count);
   document.getElementById('flashcardSummary').textContent = `Generated ${chosen.length} flashcard${chosen.length!==1?'s':''} from your notes.`;
   const listEl = document.getElementById('flashcardList');
@@ -383,6 +473,7 @@ document.getElementById('generateFlashcardsBtn').addEventListener('click', () =>
 // ---------- Init ----------
 document.getElementById('studentNameInput').value = settings.name || '';
 applyTheme();
+applyBackdrop();
 showScreen('today');
 
 if ('serviceWorker' in navigator) {
