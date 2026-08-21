@@ -1,9 +1,9 @@
-const CACHE_NAME = 'schoolsync-v2';
+const CACHE_NAME = 'schoolsync-v3';
 const ASSETS = [
   './', './index.html', './style.css', './script.js', './manifest.json',
   './icon-192.png', './icon-512.png',
-  './backdrops/bg1.jpg', './backdrops/bg2.jpg', './backdrops/bg3.jpg', './backdrops/bg4.jpg',
-  './backdrops/bg5.jpg', './backdrops/bg6.jpg', './backdrops/bg7.jpg', './backdrops/bg8.jpg'
+  './bg1.jpg', './bg2.jpg', './bg3.jpg', './bg4.jpg',
+  './bg5.jpg', './bg6.jpg', './bg7.jpg', './bg8.jpg'
 ];
 
 self.addEventListener('install', (e) => {
