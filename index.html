@@ -1,313 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>SchoolSync</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#151515">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a1a1a">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon-192.png">
+    <title>SchoolSync</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<div id="app">
-  <div id="bgLayer"></div>
-
-  <!-- TODAY -->
-  <section class="screen active" id="screen-today">
-    <header class="topbar">
-      <h1 id="todayDate">Today</h1>
-    </header>
-    <div class="scroll">
-      <div class="card focus-card">
-        <div class="focus-label">FOCUS AREA</div>
-        <div class="focus-text" id="focusText">Add marks to see your weakest subject.</div>
-      </div>
-
-      <div class="section-block">
-        <h2>Today's Tasks</h2>
-        <div id="todayTasks" class="list-plain"></div>
-      </div>
-
-      <div class="section-block">
-        <h2>Today's Events</h2>
-        <div id="todayEvents" class="list-plain"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CALENDAR -->
-  <section class="screen" id="screen-calendar">
-    <header class="topbar">
-      <h1>Calendar</h1>
-    </header>
-    <div class="scroll">
-      <div class="cal-header">
-        <button class="icon-btn" id="calPrev">&#8249;</button>
-        <div id="calMonthLabel" class="cal-month"></div>
-        <button class="icon-btn" id="calNext">&#8250;</button>
-      </div>
-      <div class="cal-weekdays">
-        <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-      </div>
-      <div class="cal-grid" id="calGrid"></div>
-    </div>
-  </section>
-
-  <!-- DATE DETAIL PANEL -->
-  <div class="sheet-overlay" id="dateSheetOverlay">
-    <div class="sheet">
-      <div class="sheet-handle"></div>
-      <h2 id="sheetDateTitle">Date</h2>
-      <div id="sheetEventList" class="list-plain"></div>
-      <button class="btn-primary" id="sheetAddEventBtn">+ Add Event</button>
-      <button class="btn-secondary" id="sheetCloseBtn">Close</button>
-    </div>
-  </div>
-
-  <!-- ADD EVENT FORM -->
-  <div class="sheet-overlay" id="eventFormOverlay">
-    <div class="sheet">
-      <div class="sheet-handle"></div>
-      <h2>Add Event</h2>
-      <label>Event name</label>
-      <input type="text" id="eventNameInput" placeholder="e.g. Maths Unit Test">
-      <label>Time</label>
-      <input type="time" id="eventTimeInput">
-      <label>Type</label>
-      <select id="eventTypeInput">
-        <option value="Academic">Academic</option>
-        <option value="Co-curricular">Co-curricular</option>
-      </select>
-      <label>Notes</label>
-      <input type="text" id="eventNotesInput" placeholder="Optional">
-      <div id="clashWarning" class="clash-warning" style="display:none;">&#9888; There's already an event on this date.</div>
-      <button class="btn-primary" id="saveEventBtn">Save Event</button>
-      <button class="btn-secondary" id="cancelEventBtn">Cancel</button>
-    </div>
-  </div>
-
-  <!-- TO-DO -->
-  <section class="screen" id="screen-todo">
-    <header class="topbar">
-      <h1>To-Do</h1>
-      <button class="icon-btn header-add" id="openAddTaskBtn">+</button>
-    </header>
-    <div class="scroll">
-      <div class="todo-summary-row">
-        <div class="mini-stat"><span class="mini-num" id="statOpen">0</span><span class="mini-label">Open</span></div>
-        <div class="mini-stat"><span class="mini-num" id="statHigh">0</span><span class="mini-label">High</span></div>
-        <div class="mini-stat"><span class="mini-num" id="statDone">0</span><span class="mini-label">Done</span></div>
-      </div>
-      <div id="todoGroups"></div>
-    </div>
-  </section>
-
-  <div class="sheet-overlay" id="addTaskOverlay">
-    <div class="sheet">
-      <div class="sheet-handle"></div>
-      <h2>Add Task</h2>
-      <label>Task name</label>
-      <input type="text" id="taskNameInput" placeholder="e.g. Finish Maths worksheet">
-      <label>Subject</label>
-      <input type="text" id="taskSubjectInput" placeholder="e.g. Maths">
-      <label>Due date</label>
-      <input type="date" id="taskDueInput">
-      <button class="btn-primary" id="addTaskBtn">Add Task</button>
-      <button class="btn-secondary" id="cancelTaskBtn">Cancel</button>
-    </div>
-  </div>
-
-  <!-- TIMER -->
-  <section class="screen" id="screen-timer">
-    <header class="topbar">
-      <h1>Study Timer</h1>
-    </header>
-    <div class="scroll timer-scroll">
-      <div class="timer-ring-wrap">
-        <svg class="timer-ring" viewBox="0 0 200 200">
-          <circle class="ring-bg" cx="100" cy="100" r="90"></circle>
-          <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="90"></circle>
-        </svg>
-        <div class="timer-display" id="timerDisplay">25:00</div>
-      </div>
-      <input type="text" id="timerSubjectInput" placeholder="Subject (optional)">
-      <div class="timer-controls">
-        <button class="btn-secondary" id="timerResetBtn">Reset</button>
-        <button class="btn-primary" id="timerStartBtn">Start</button>
-        <button class="btn-secondary" id="timerPauseBtn">Pause</button>
-      </div>
-      <div class="timer-stats-row">
-        <div class="card timer-stat-card"><div class="ts-num" id="statSessions">0</div><div class="ts-label">Sessions Today</div></div>
-        <div class="card timer-stat-card"><div class="ts-num" id="statMinutes">0</div><div class="ts-label">Minutes Today</div></div>
-      </div>
-      <h2 style="margin-top:22px; align-self:flex-start;">Recent Sessions</h2>
-      <div id="timerLog" class="list-plain" style="width:100%;"></div>
-    </div>
-  </section>
-
-  <!-- MARKS -->
-  <section class="screen" id="screen-marks">
-    <header class="topbar">
-      <button class="icon-btn back-btn" data-back="more">&#8249;</button>
-      <h1>Marks</h1>
-      <button class="icon-btn header-add" id="openAddMarkBtn">+</button>
-    </header>
-    <div class="scroll">
-      <div class="card focus-card" id="marksFocusCard" style="display:none;">
-        <div class="focus-label">WEAKEST SUBJECT</div>
-        <div class="focus-text" id="marksFocusText"></div>
-      </div>
-      <h2>Subject Performance</h2>
-      <div id="marksChart" class="chart-wrap"></div>
-      <h2 style="margin-top:22px;">Recent Results</h2>
-      <div id="marksHistory" class="list-plain"></div>
-    </div>
-  </section>
-
-  <div class="sheet-overlay" id="addMarkOverlay">
-    <div class="sheet">
-      <div class="sheet-handle"></div>
-      <h2>Add Result</h2>
-      <label>Subject</label>
-      <input type="text" id="markSubjectInput" placeholder="e.g. Science">
-      <label>Test name</label>
-      <input type="text" id="markTestInput" placeholder="e.g. Unit Test 1">
-      <div style="display:flex; gap:10px;">
-        <div style="flex:1;"><label>Marks scored</label><input type="number" id="markScoredInput"></div>
-        <div style="flex:1;"><label>Total marks</label><input type="number" id="markTotalInput"></div>
-      </div>
-      <button class="btn-primary" id="addMarkBtn">Add Result</button>
-      <button class="btn-secondary" id="cancelMarkBtn">Cancel</button>
-    </div>
-  </div>
-
-  <!-- CHATBOT -->
-  <section class="screen" id="screen-chatbot">
-    <header class="topbar">
-      <button class="icon-btn back-btn" data-back="more">&#8249;</button>
-      <h1>Homework Helper</h1>
-    </header>
-    <div class="scroll" id="chatMessages"></div>
-    <div class="chat-input-row">
-      <input type="text" id="chatInput" placeholder="Ask a homework question...">
-      <button class="btn-primary small" id="chatSendBtn">Send</button>
-    </div>
-  </section>
-
-  <!-- FLASHCARDS -->
-  <section class="screen" id="screen-flashcards">
-    <header class="topbar">
-      <button class="icon-btn back-btn" data-back="more">&#8249;</button>
-      <h1>Flashcards</h1>
-    </header>
-    <div class="scroll">
-      <label class="small-label">Paste your notes</label>
-      <textarea id="notesInput" rows="6" placeholder="Paste chapter notes here..."></textarea>
-      <button class="btn-primary" id="generateFlashcardsBtn">Generate Flashcards</button>
-      <div id="flashcardSummary" class="focus-text" style="margin-top:14px;"></div>
-      <div id="flashcardList" style="margin-top:16px;"></div>
-    </div>
-  </section>
-
-  <!-- SETTINGS -->
-  <section class="screen" id="screen-settings">
-    <header class="topbar">
-      <button class="icon-btn back-btn" data-back="more">&#8249;</button>
-      <h1>Settings</h1>
-    </header>
-    <div class="scroll">
-      <div class="section-block">
-        <h2>Theme</h2>
-        <div class="theme-row">
-          <span>Dark (black / white text)</span>
-          <label class="switch">
-            <input type="checkbox" id="themeToggle">
-            <span class="slider"></span>
-          </label>
+    <!-- MIUI-style carousel backdrop -->
+    <div id="backdropCarousel" class="backdrop-carousel">
+        <div class="carousel-container">
+            <div class="carousel-track" id="carouselTrack">
+                <!-- Images loaded dynamically -->
+            </div>
         </div>
-      </div>
+        <div class="carousel-dots" id="carouselDots"></div>
+    </div>
 
-      <div class="section-block">
-        <h2>Backdrop</h2>
-        <div class="carousel-wrap">
-          <div class="carousel-track" id="bgCarouselTrack">
-            <div class="carousel-slide" data-bg="none"><div class="slide-none">None</div></div>
-            <div class="carousel-slide" data-bg="bg1.jpg"><img src="bg1.jpg" loading="lazy"></div>
-            <div class="carousel-slide" data-bg="bg2.jpg"><img src="bg2.jpg" loading="lazy"></div>
-            <div class="carousel-slide" data-bg="bg3.jpg"><img src="bg3.jpg" loading="lazy"></div>
-            <div class="carousel-slide" data-bg="bg4.jpg"><img src="bg4.jpg" loading="lazy"></div>
-            <div class="carousel-slide" data-bg="bg5.jpg"><img src="bg5.jpg" loading="lazy"></div>
-            <div class="carousel-slide" data-bg="bg6.jpg"><img src="bg6.jpg" loading="lazy"></div>
-            <div class="carousel-slide" data-bg="bg7.jpg"><img src="bg7.jpg" loading="lazy"></div>
-            <div class="carousel-slide" data-bg="bg8.jpg"><img src="bg8.jpg" loading="lazy"></div>
-          </div>
-          <div class="carousel-dots" id="bgCarouselDots"></div>
+    <!-- Active backdrop overlay -->
+    <div id="activeBackdrop" class="active-backdrop" style="background-image: url('bg4.jpg')"></div>
+
+    <!-- Main app container -->
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header glass-surface">
+            <div class="header-content">
+                <h1 id="appTitle">Today</h1>
+                <button id="settingsBtn" class="settings-btn" aria-label="Settings">⚙️</button>
+            </div>
         </div>
-      </div>
 
-      <div class="section-block">
-        <h2>Student</h2>
-        <input type="text" id="studentNameInput" placeholder="Your name">
-      </div>
-      <div class="section-block">
-        <button class="btn-secondary" id="resetDataBtn">Reset All Data</button>
-      </div>
+        <!-- Tab Navigation -->
+        <div class="tab-nav glass-surface">
+            <button class="tab-btn active" data-tab="today">📅 Today</button>
+            <button class="tab-btn" data-tab="todo">✓ To-Do</button>
+            <button class="tab-btn" data-tab="timer">⏱️ Timer</button>
+            <button class="tab-btn" data-tab="notes">📝 Notes</button>
+            <button class="tab-btn" data-tab="marks">📊 Marks</button>
+            <button class="tab-btn" data-tab="chat">💬 Chat</button>
+        </div>
+
+        <!-- Content area -->
+        <div class="content-area">
+            <!-- TODAY TAB -->
+            <div class="tab-content active" id="today-tab">
+                <div class="calendar-container glass-surface">
+                    <div class="calendar-header">
+                        <button id="prevMonth">&lt;</button>
+                        <h2 id="monthYear"></h2>
+                        <button id="nextMonth">&gt;</button>
+                    </div>
+                    <div class="weekdays">
+                        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div>
+                        <div>Thu</div><div>Fri</div><div>Sat</div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                </div>
+                <div class="today-tasks-preview glass-surface">
+                    <h3>Today's Tasks</h3>
+                    <div id="todayTasksList"></div>
+                </div>
+            </div>
+
+            <!-- TO-DO TAB -->
+            <div class="tab-content" id="todo-tab">
+                <div class="todo-header glass-surface">
+                    <button class="add-btn">+ Add Task</button>
+                </div>
+                <div class="filter-buttons glass-surface">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="urgent">Urgent</button>
+                    <button class="filter-btn" data-filter="high">High</button>
+                    <button class="filter-btn" data-filter="normal">Normal</button>
+                </div>
+                <div class="todo-list" id="todoList"></div>
+            </div>
+
+            <!-- TIMER TAB -->
+            <div class="tab-content" id="timer-tab">
+                <div class="timer-container glass-surface">
+                    <div class="timer-header">
+                        <label for="subjectSelect">Subject:</label>
+                        <select id="subjectSelect" class="timer-subject-select">
+                            <option value="">Select Subject</option>
+                            <option value="English">English</option>
+                            <option value="Maths">Maths</option>
+                            <option value="Science">Science</option>
+                            <option value="Social Studies">Social Studies</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="Sanskrit">Sanskrit</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="timer-display" id="timerDisplay">00:00:00</div>
+                    <div class="timer-progress">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div class="timer-input">
+                        <input type="number" id="hoursInput" placeholder="H" min="0" max="23">
+                        <input type="number" id="minutesInput" placeholder="M" min="0" max="59">
+                        <input type="number" id="secondsInput" placeholder="S" min="0" max="59">
+                    </div>
+                    <button class="timer-btn" id="timerToggleBtn">Start</button>
+                </div>
+            </div>
+
+            <!-- NOTES TAB -->
+            <div class="tab-content" id="notes-tab">
+                <div class="notes-header glass-surface">
+                    <button class="add-btn">+ New Note</button>
+                </div>
+                <div class="notes-list" id="notesList"></div>
+                <div class="note-editor glass-surface" id="noteEditor" style="display:none;">
+                    <textarea id="noteText" placeholder="Take a note..."></textarea>
+                    <button id="saveNoteBtn">Save</button>
+                </div>
+            </div>
+
+            <!-- MARKS TAB -->
+            <div class="tab-content" id="marks-tab">
+                <div class="marks-header glass-surface">
+                    <button class="add-btn">+ Add Score</button>
+                </div>
+                <div class="marks-stats glass-surface">
+                    <div class="stat-item">
+                        <span class="stat-label">Average</span>
+                        <span class="stat-value" id="averageScore">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Highest</span>
+                        <span class="stat-value" id="highestScore">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Tests</span>
+                        <span class="stat-value" id="totalTests">0</span>
+                    </div>
+                </div>
+                <div class="marks-performance glass-surface">
+                    <h3>Performance</h3>
+                    <div id="performanceBars"></div>
+                </div>
+                <div class="marks-history glass-surface">
+                    <h3>Score History</h3>
+                    <div id="marksHistory"></div>
+                </div>
+            </div>
+
+            <!-- CHAT TAB -->
+            <div class="tab-content" id="chat-tab">
+                <div class="chat-container glass-surface">
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chatInput" placeholder="Ask something..." class="chat-input">
+                        <button id="chatSendBtn" class="chat-send-btn">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom navigation -->
+        <nav class="bottom-nav glass-surface">
+            <button class="nav-btn active" data-tab="today">📅</button>
+            <button class="nav-btn" data-tab="todo">✓</button>
+            <button class="nav-btn" data-tab="timer">⏱️</button>
+            <button class="nav-btn" data-tab="notes">📝</button>
+            <button class="nav-btn" data-tab="marks">📊</button>
+            <button class="nav-btn" data-tab="chat">💬</button>
+        </nav>
     </div>
-  </section>
 
-  <!-- MORE MENU -->
-  <section class="screen" id="screen-more">
-    <header class="topbar">
-      <h1>More</h1>
-    </header>
-    <div class="scroll">
-      <button class="more-item" data-nav="marks">
-        <span class="more-icon">&#128202;</span>
-        <span>Marks<br><small>Track test scores & weak subjects</small></span>
-        <span class="chev">&#8250;</span>
-      </button>
-      <button class="more-item" data-nav="chatbot">
-        <span class="more-icon">&#129302;</span>
-        <span>Homework Helper<br><small>Ask any subject question</small></span>
-        <span class="chev">&#8250;</span>
-      </button>
-      <button class="more-item" data-nav="flashcards">
-        <span class="more-icon">&#127903;</span>
-        <span>Flashcards<br><small>Turn notes into flashcards</small></span>
-        <span class="chev">&#8250;</span>
-      </button>
-      <button class="more-item" data-nav="settings">
-        <span class="more-icon">&#9881;</span>
-        <span>Settings<br><small>Theme & preferences</small></span>
-        <span class="chev">&#8250;</span>
-      </button>
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content glass-surface">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <label for="themeToggle">Dark Theme</label>
+                    <input type="checkbox" id="themeToggle" class="toggle-switch">
+                </div>
+                <div class="setting-item">
+                    <label for="autoRotateToggle">Auto-rotate Backdrops</label>
+                    <input type="checkbox" id="autoRotateToggle" class="toggle-switch" checked>
+                </div>
+                <div class="setting-item">
+                    <h3>Backdrop Preview</h3>
+                    <div class="backdrop-preview-grid" id="backdropPreview"></div>
+                </div>
+            </div>
+        </div>
     </div>
-  </section>
 
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
-    <button class="nav-btn active" data-nav="today">
-      <span class="nav-icon">&#8962;</span><span>Today</span>
-    </button>
-    <button class="nav-btn" data-nav="calendar">
-      <span class="nav-icon">&#128197;</span><span>Calendar</span>
-    </button>
-    <button class="nav-btn" data-nav="todo">
-      <span class="nav-icon">&#10003;</span><span>To-Do</span>
-    </button>
-    <button class="nav-btn" data-nav="timer">
-      <span class="nav-icon">&#9201;</span><span>Timer</span>
-    </button>
-    <button class="nav-btn" data-nav="more">
-      <span class="nav-icon">&#8943;</span><span>More</span>
-    </button>
-  </nav>
+    <!-- Add Task/Score Modal -->
+    <div class="modal" id="addModal">
+        <div class="modal-content glass-surface">
+            <div class="modal-header">
+                <h2 id="addModalTitle">Add Task</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="addModalBody"></div>
+        </div>
+    </div>
 
-</div>
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
