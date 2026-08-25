@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <title>SchoolSync</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-top">
+                <h1 id="pageTitle">Monday, 24 August</h1>
+                <button id="settingsBtn" class="settings-btn">⚙️</button>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- TODAY TAB -->
+            <div class="tab-content active" id="today-tab">
+                <div class="focus-area-card card">
+                    <div class="focus-icon">⚠️</div>
+                    <div class="focus-text">
+                        <strong>Focus Area</strong>
+                        <p id="focusAreaText">Maths is your weakest subject at 64%</p>
+                    </div>
+                </div>
+
+                <div class="section-title">Today's Tasks</div>
+                <div id="todayTasksList" class="tasks-list"></div>
+
+                <div class="section-title">Today's Events</div>
+                <div id="todayEventsList" class="events-list"></div>
+            </div>
+
+            <!-- CALENDAR TAB -->
+            <div class="tab-content" id="calendar-tab">
+                <div class="calendar-card card">
+                    <div class="calendar-header">
+                        <button id="prevMonth" class="month-btn">&lt;</button>
+                        <h2 id="monthYear"></h2>
+                        <button id="nextMonth" class="month-btn">&gt;</button>
+                    </div>
+                    <div class="weekdays">
+                        <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div>
+                        <div>THU</div><div>FRI</div><div>SAT</div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                </div>
+            </div>
+
+            <!-- TO-DO TAB -->
+            <div class="tab-content" id="todo-tab">
+                <div class="todo-header">
+                    <button class="add-btn-primary" id="addTaskBtn">+ Add Task</button>
+                </div>
+                <div class="filter-pills">
+                    <button class="filter-pill active" data-filter="all">All</button>
+                    <button class="filter-pill" data-filter="urgent">Urgent</button>
+                    <button class="filter-pill" data-filter="high">High</button>
+                    <button class="filter-pill" data-filter="normal">Normal</button>
+                </div>
+                <div id="todoList" class="todo-list"></div>
+            </div>
+
+            <!-- TIMER TAB -->
+            <div class="tab-content" id="timer-tab">
+                <div class="timer-header">
+                    <label>Subject</label>
+                    <select id="subjectSelect" class="subject-select">
+                        <option value="">Select Subject</option>
+                        <option value="English">English</option>
+                        <option value="Maths">Maths</option>
+                        <option value="Science">Science</option>
+                        <option value="Social Studies">Social Studies</option>
+                        <option value="Hindi">Hindi</option>
+                    </select>
+                </div>
+
+                <div class="timer-display" id="timerDisplay">00:00</div>
+
+                <div class="timer-inputs">
+                    <input type="number" id="minutesInput" placeholder="Minutes" min="0" max="59">
+                    <input type="number" id="secondsInput" placeholder="Seconds" min="0" max="59">
+                </div>
+
+                <div class="timer-buttons">
+                    <button class="btn-secondary" id="resetBtn">Reset</button>
+                    <button class="btn-primary" id="timerToggleBtn">Start</button>
+                </div>
+
+                <div class="recent-sessions">
+                    <h3>Recent Sessions</h3>
+                    <div id="recentSessionsList"></div>
+                </div>
+            </div>
+
+            <!-- FLASHCARDS TAB -->
+            <div class="tab-content" id="flashcards-tab">
+                <div class="flashcards-header">
+                    <button class="add-btn-primary" id="addFlashcardBtn">+ New Flashcards</button>
+                </div>
+                <div id="flashcardsList" class="flashcards-list"></div>
+            </div>
+
+            <!-- MARKS TAB -->
+            <div class="tab-content" id="marks-tab">
+                <div class="marks-header">
+                    <button class="add-btn-primary" id="addMarksBtn">+ Add Score</button>
+                </div>
+
+                <div class="section-title">Subject Performance</div>
+                <div id="performanceBars" class="performance-bars"></div>
+
+                <div class="section-title">Score History</div>
+                <div id="marksHistory" class="marks-history"></div>
+            </div>
+
+            <!-- MORE/CHAT TAB -->
+            <div class="tab-content" id="more-tab">
+                <div class="more-menu">
+                    <div class="menu-item" id="marksMenuItem">
+                        <div class="menu-icon">📊</div>
+                        <div class="menu-text">
+                            <strong>Marks</strong>
+                            <p>Test scores and subject performance</p>
+                        </div>
+                    </div>
+                    <div class="menu-item" id="chatMenuItem">
+                        <div class="menu-icon">💬</div>
+                        <div class="menu-text">
+                            <strong>Chatbot</strong>
+                            <p>AI homework help</p>
+                        </div>
+                    </div>
+                    <div class="menu-item" id="flashcardsMenuItem">
+                        <div class="menu-icon">✨</div>
+                        <div class="menu-text">
+                            <strong>Flashcards</strong>
+                            <p>AI-generated study cards</p>
+                        </div>
+                    </div>
+                    <div class="menu-item" id="settingsMenuItem">
+                        <div class="menu-icon">⚙️</div>
+                        <div class="menu-text">
+                            <strong>Settings</strong>
+                            <p>Theme and profile</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHAT FEATURE (full screen) -->
+            <div class="tab-content" id="chat-tab">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-input-wrapper">
+                        <input type="text" id="chatInput" class="chat-input" placeholder="Ask a homework question...">
+                        <button id="chatSendBtn" class="chat-send">→</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-tab="today">📅<br><span>Today</span></button>
+            <button class="nav-btn" data-tab="calendar">📋<br><span>Calendar</span></button>
+            <button class="nav-btn" data-tab="todo">✓<br><span>To-Do</span></button>
+            <button class="nav-btn" data-tab="timer">⏱️<br><span>Timer</span></button>
+            <button class="nav-btn" data-tab="more">⋯<br><span>More</span></button>
+        </nav>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label>Student Name</label>
+                    <input type="text" id="studentNameInput" class="setting-input" placeholder="Enter your name">
+                </div>
+                <div class="setting-group">
+                    <label>Theme</label>
+                    <div class="theme-toggle">
+                        <input type="checkbox" id="themeToggle">
+                        <label for="themeToggle" class="toggle-label">Dark mode</label>
+                    </div>
+                </div>
+                <button class="btn-primary" id="saveSettingsBtn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD TASK MODAL -->
+    <div class="modal" id="addTaskModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Task</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="taskTitleInput" class="setting-input" placeholder="Task title">
+                <label>Priority</label>
+                <select id="taskPrioritySelect" class="setting-input">
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                </select>
+                <button class="btn-primary" id="saveTaskBtn">Add Task</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
