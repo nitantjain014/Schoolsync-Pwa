@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="white">
+    <title>SchoolSync</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Firebase (for Google Sign-In). Harmless if offline / not configured yet. -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-top">
+                <h1 id="pageTitle">Monday, 24 August</h1>
+                <button id="settingsBtn" class="settings-btn">⚙️</button>
+            </div>
+        </div>
+
+        <!-- CONTENT AREA -->
+        <div class="content-area">
+            <!-- TODAY TAB -->
+            <div class="tab-content active" id="today-tab">
+                <div class="focus-card card">
+                    <div class="focus-icon">⚠️</div>
+                    <div class="focus-text">
+                        <strong>Focus Area</strong>
+                        <p id="focusAreaText">Maths is your weakest subject at 64%</p>
+                    </div>
+                </div>
+
+                <div class="section-title">Today's Tasks</div>
+                <div id="todayTasksList"></div>
+
+                <div class="section-title">Today's Events</div>
+                <div id="todayEventsList"></div>
+            </div>
+
+            <!-- CALENDAR TAB -->
+            <div class="tab-content" id="calendar-tab">
+                <div class="calendar-card card">
+                    <div class="calendar-header">
+                        <button id="prevMonth" class="month-btn">&lt;</button>
+                        <h2 id="monthYear"></h2>
+                        <button id="nextMonth" class="month-btn">&gt;</button>
+                    </div>
+                    <div class="streak-badge" id="streakBadge">🔥 0 day streak</div>
+                    <div class="weekdays">
+                        <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div>
+                        <div>THU</div><div>FRI</div><div>SAT</div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                </div>
+            </div>
+
+            <!-- TO-DO TAB -->
+            <div class="tab-content" id="todo-tab">
+                <div class="todo-header">
+                    <button class="add-btn" id="addTaskBtn">+ Add Task</button>
+                </div>
+                <div class="filter-pills">
+                    <button class="filter-pill active" data-filter="all">All</button>
+                    <button class="filter-pill" data-filter="urgent">Urgent</button>
+                    <button class="filter-pill" data-filter="high">High</button>
+                    <button class="filter-pill" data-filter="normal">Normal</button>
+                </div>
+                <div id="todoList"></div>
+            </div>
+
+            <!-- TIMER TAB -->
+            <div class="tab-content" id="timer-tab">
+                <div class="timer-section card">
+                    <div class="timer-header">
+                        <label>Subject</label>
+                        <select id="subjectSelect" class="subject-select">
+                            <option value="">Select Subject</option>
+                            <option value="English">English</option>
+                            <option value="Maths">Maths</option>
+                            <option value="Science">Science</option>
+                            <option value="Social Studies">Social Studies</option>
+                            <option value="Hindi">Hindi</option>
+                        </select>
+                    </div>
+
+                    <div class="timer-display" id="timerDisplay">00:00</div>
+
+                    <div class="timer-inputs">
+                        <input type="number" id="minutesInput" placeholder="Minutes" min="0" max="59">
+                        <input type="number" id="secondsInput" placeholder="Seconds" min="0" max="59">
+                    </div>
+
+                    <div class="timer-buttons">
+                        <button class="btn-secondary" id="resetBtn">Reset</button>
+                        <button class="btn-primary" id="timerToggleBtn">Start</button>
+                    </div>
+                </div>
+
+                <div class="section-title">Recent Sessions</div>
+                <div id="recentSessionsList"></div>
+            </div>
+
+            <!-- MARKS TAB (shown in More menu) -->
+            <div class="tab-content" id="marks-tab">
+                <div class="marks-header">
+                    <button class="add-btn" id="addMarksBtn">+ Add Score</button>
+                </div>
+
+                <div class="section-title">Subject Performance</div>
+                <div id="performanceBars"></div>
+
+                <div class="section-title">Score History</div>
+                <div id="marksHistory"></div>
+            </div>
+
+            <!-- FLASHCARDS TAB (shown in More menu) -->
+            <div class="tab-content" id="flashcards-tab">
+                <div class="flashcards-header">
+                    <button class="add-btn" id="addFlashcardBtn">+ New Flashcards</button>
+                </div>
+                <div id="flashcardsList"></div>
+            </div>
+            <!-- (flashcards-header button now opens addFlashcardModal, see script.js) -->
+
+            <!-- MORE TAB -->
+            <div class="tab-content" id="more-tab">
+                <div class="more-menu">
+                    <div class="menu-item" id="marksMenuItem">
+                        <div class="menu-icon">📊</div>
+                        <div class="menu-text">
+                            <strong>Marks</strong>
+                            <p>Test scores and subject performance</p>
+                        </div>
+                    </div>
+                    <div class="menu-item" id="flashcardsMenuItem">
+                        <div class="menu-icon">✨</div>
+                        <div class="menu-text">
+                            <strong>Flashcards</strong>
+                            <p>AI-generated study cards</p>
+                        </div>
+                    </div>
+                    <div class="menu-item" id="settingsMenuItem">
+                        <div class="menu-icon">⚙️</div>
+                        <div class="menu-text">
+                            <strong>Settings</strong>
+                            <p>Theme and profile</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-tab="today">📅<br><span>Today</span></button>
+            <button class="nav-btn" data-tab="calendar">📋<br><span>Calendar</span></button>
+            <button class="nav-btn" data-tab="todo">✓<br><span>To-Do</span></button>
+            <button class="nav-btn" data-tab="timer">⏱️<br><span>Timer</span></button>
+            <button class="nav-btn" data-tab="more">⋯<br><span>More</span></button>
+        </nav>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label>Student Name</label>
+                    <input type="text" id="studentNameInput" class="setting-input" placeholder="Enter your name">
+                </div>
+                <div class="setting-group">
+                    <label for="themeToggle">Dark Mode</label>
+                    <input type="checkbox" id="themeToggle">
+                </div>
+                <div class="setting-group">
+                    <label>Google Account</label>
+                    <button class="btn-secondary" id="googleSignInBtn" type="button">Sign in with Google</button>
+                    <div class="google-account-status" id="googleAccountStatus">Not signed in</div>
+                </div>
+                <button class="btn-primary" id="saveSettingsBtn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD TASK MODAL -->
+    <div class="modal" id="addTaskModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Task</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="taskTitleInput" class="setting-input" placeholder="Task title">
+                <div class="setting-group">
+                    <label for="taskDeadlineInput">Deadline (optional)</label>
+                    <input type="date" id="taskDeadlineInput" class="setting-input">
+                </div>
+                <select id="taskPrioritySelect" class="setting-input">
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                </select>
+                <button class="btn-primary" id="saveTaskBtn">Add Task</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD MARKS MODAL -->
+    <div class="modal" id="addMarksModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Score</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <select id="marksSubjectSelect" class="setting-input">
+                    <option value="">Select Subject</option>
+                    <option value="English">English</option>
+                    <option value="Maths">Maths</option>
+                    <option value="Science">Science</option>
+                    <option value="Social Studies">Social Studies</option>
+                    <option value="Hindi">Hindi</option>
+                </select>
+                <div style="display: flex; gap: 8px;">
+                    <input type="number" id="marksScoreInput" class="setting-input" placeholder="Your Score" min="0" style="flex: 1;">
+                    <div style="display: flex; align-items: center; padding: 12px 8px; color: var(--text-secondary); font-weight: 600;">/</div>
+                    <input type="number" id="marksMaxInput" class="setting-input" placeholder="Max Score" min="1" value="100" style="flex: 1;">
+                </div>
+                <div style="padding: 12px; background-color: var(--bg-secondary); border-radius: 8px; text-align: center;">
+                    <div style="font-size: 12px; color: var(--text-tertiary); margin-bottom: 4px;">Percentage</div>
+                    <div style="font-size: 24px; font-weight: 700; color: var(--accent);" id="percentageDisplay">0%</div>
+                </div>
+                <button class="btn-primary" id="saveMarksBtn">Add Score</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD FLASHCARD MODAL -->
+    <div class="modal" id="addFlashcardModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>New Flashcard Set</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="flashcardTitleInput" class="setting-input" placeholder="Set title (e.g. Photosynthesis)">
+                <textarea id="flashcardNotesInput" class="setting-input" placeholder="Paste your notes here..."></textarea>
+                <div class="ai-hint">AI will read your notes and auto-create flashcards from it</div>
+                <button class="btn-primary" id="generateFlashcardsBtn">✨ Generate Flashcards with AI</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW FLASHCARDS MODAL -->
+    <div class="modal" id="viewFlashcardsModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="viewFlashcardsTitle">Flashcards</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="flashcard-viewer">
+                    <div class="flashcard-flip" id="flashcardFlip">
+                        <div id="flashcardText">Card</div>
+                    </div>
+                </div>
+                <div class="flashcard-nav">
+                    <button class="btn-secondary" id="prevCardBtn">‹ Prev</button>
+                    <span id="cardCounter">1 / 1</span>
+                    <button class="btn-secondary" id="nextCardBtn">Next ›</button>
+                </div>
+                <button class="btn-primary" id="deleteFlashcardSetBtn" style="background-color: var(--urgent);">Delete this set</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
