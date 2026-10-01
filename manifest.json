@@ -2,32 +2,41 @@
   "name": "SchoolSync By DAV Devs",
   "short_name": "SchoolSync",
   "description": "Student productivity app for managing marks, tasks, timer, and calendar",
+  "id": "com.schoolsync.app",
   "start_url": "https://nitantjain014.github.io/Schoolsync-Pwa/",
   "scope": "/Schoolsync-Pwa/",
+  "dir": "ltr",
+  "lang": "en-US",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#6366f1",
   "orientation": "portrait-primary",
-  "icons": [
+  "background_color": "#1a1a1a",
+  "theme_color": "#6366f1",
+  "categories": ["productivity", "education"],
+  "iarc_rating_id": "e84b9d60-6c37-492f-904c-758d4361af59",
+  "screenshots": [],
+  "shortcuts": [
     {
-      "src": "https://nitantjain014.github.io/Schoolsync-Pwa/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "name": "Add Task",
+      "url": "https://nitantjain014.github.io/Schoolsync-Pwa/?tab=todo",
+      "description": "Quickly add a new task"
     },
     {
-      "src": "https://nitantjain014.github.io/Schoolsync-Pwa/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "name": "Start Timer",
+      "url": "https://nitantjain014.github.io/Schoolsync-Pwa/?tab=timer",
+      "description": "Start a study session"
+    },
+    {
+      "name": "View Marks",
+      "url": "https://nitantjain014.github.io/Schoolsync-Pwa/?tab=marks",
+      "description": "Check your academic performance"
     }
   ],
-  "categories": ["productivity", "education"],
-  "screenshots": [
+  "protocol_handlers": [
     {
-      "src": "https://nitantjain014.github.io/Schoolsync-Pwa/icon-192.png",
-      "sizes": "192x192",
-      "form_factor": "narrow"
+      "protocol": "web+schoolsync",
+      "url": "https://nitantjain014.github.io/Schoolsync-Pwa/?task=%s"
     }
-  ]
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }
