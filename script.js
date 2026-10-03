@@ -229,9 +229,10 @@ try {
         firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
         firebaseReady = true;
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+            .catch((err) => console.log('Persistence setup failed:', err));
     }
-} catch (e) {
-    console.log('Firebase not configured yet:', e);
+} catch (e) {    console.log('Firebase not configured yet:', e);
 }
 
 const googleSignInBtn = document.getElementById('googleSignInBtn');
