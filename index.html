@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e293b">
+<title>SchoolSync By DAV Devs</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+<header><h1 id="date"></h1><button class="gear" onclick="openSettings()" aria-label="Settings">⚙️</button></header>
+<main id="view"></main>
+<nav>
+  <button data-t="today" onclick="go('today')"><span>📅</span>Today</button>
+  <button data-t="cal" onclick="go('cal')"><span>📋</span>Calendar</button>
+  <button data-t="todo" onclick="go('todo')"><span>✓</span>To-Do</button>
+  <button data-t="timer" onclick="go('timer')"><span>⏱️</span>Timer</button>
+  <button data-t="more" onclick="go('more')"><span>•••</span>More</button>
+</nav>
+<script>function __e(m){var d=document.createElement('div');d.style.cssText='position:fixed;left:0;right:0;bottom:50px;z-index:99;background:#b91c1c;color:#fff;padding:8px 12px;font:12px monospace';d.textContent='Error: '+m;document.body.appendChild(d)}onerror=function(m,s,l){__e(m+' ('+String(s||'').split('/').pop()+':'+l+')')}</script>
+<div id="ov" onclick="closeSheet()"></div>
+<div id="sheet"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="script.js?v=3" onerror="__e('script.js failed to load')"></script>
+</body>
+</html>
